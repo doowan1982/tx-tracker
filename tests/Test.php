@@ -39,7 +39,7 @@ class Test extends TestCase{
     }
 
     private function process($tracker){
-        $tracker->add(Invocation::persist('处理逻辑1', '00000')->setArguments(['id' => 123123, "order_id" => 'TXSD234234']));
+        // $tracker->add(Invocation::persist('处理逻辑1', '00000')->setArguments(['id' => 123123, "order_id" => 'TXSD234234']));
         $tracker->add(Invocation::create('处理逻辑2')->setTarget($this)->setArguments(['a' => 1, 'b' => 2]));
         $tracker->add(Invocation::create('处理逻辑3')->setTarget(__METHOD__)->setArguments(['sdf' => 1, 'b' => 2]));
         $tracker->add(Invocation::create('处理逻辑4')->setArguments(['sdf' => 1, 'b' => 2]));
@@ -61,22 +61,12 @@ class Test extends TestCase{
         }
         $this->tracker = Tracker::getInstance();
         $this->tracker->setShutdownHandler([$this, "registerShutdown"]);
-        // $this->tracker->setDataSender($this->getDataSender());
+        $this->tracker->setDataSender($this->getDataSender());
         return $this->tracker;
     }
 
     private function getDataSender(){
-        return new class extends DataSender{
-            public function send(Invocation $headInvocation): bool{
-                $package = Tracker::getInstance()->getApplication()->getDataPackage();
-                $string = json_encode($package->getJson($headInvocation));
-                if(is_string($string)){
-                    echo $string.PHP_EOL;
-                    return true;
-                }
-                return false;
-            }
-        };
+        return new DataSender('http://test-dev.tesoon.com');
     }
 
 }

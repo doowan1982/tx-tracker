@@ -35,6 +35,12 @@ abstract class Application{
     private $operator;
 
     /**
+     * 当前应用是否在调用链的头部，如果构造参数指明$traceId，则该值为false
+     * @var bool
+     */
+    private $isHead = true;
+
+    /**
      * @param string $id
      * @param string $name
      * @param Operator $operator
@@ -45,6 +51,9 @@ abstract class Application{
         $this->name = $name;
         $this->operator = $operator;
         $this->traceId = $traceId;
+        if($this->traceId){
+            $this->isHead = false;
+        }
         $this->timestamp = microtime(true);
     }
 
@@ -89,6 +98,13 @@ abstract class Application{
     public function setTraceId($traceId){
         $this->traceId = $traceId;
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHead(): bool{
+        return $this->isHead;
     }
 
     public function getTimestamp(): float{

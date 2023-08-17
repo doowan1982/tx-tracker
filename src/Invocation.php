@@ -153,8 +153,8 @@ class Invocation{
      * @param Invocation $invocation
      */
     public function setNext(Invocation $invocation){
-        if(Tracker::getInstance()->getApplication()->getTraceId() && !$this->parent){
-            throw new TraceException("当TraceId不为空时，需指定ParentId");
+        if(!Tracker::getInstance()->getApplication()->isHead() && !$this->parent){
+            throw new TraceException("Must indicate ParentId When 'TraceId' is not null!");
         }
         $this->generationCount++;
         if($this->next === null){

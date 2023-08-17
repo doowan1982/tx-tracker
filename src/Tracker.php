@@ -137,7 +137,7 @@ final class Tracker{
             return true;
         }
         if($this->sender === null){
-            $this->setDataSender(new DataSender());
+            throw new TraceException("Please indicate DataSender!");
         }
         return $this->sender->send($this->headInvocation);
     }
