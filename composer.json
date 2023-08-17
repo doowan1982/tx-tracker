@@ -1,0 +1,29 @@
+{
+    "name": "tx/tracker",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Tesoon\\Tracker\\": "src/"
+        }
+    },
+    "license": "MIT",
+    "autoload-dev": {
+        "psr-4": {
+            "Tesoon\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "doowan",
+            "email": "doowan@qq.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.2"
+    },
+    "require-dev": {
+        "ext-curl": "*",
+        "phpunit/phpunit": "^7.5"
+    }
+}
