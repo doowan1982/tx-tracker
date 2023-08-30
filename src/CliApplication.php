@@ -7,6 +7,9 @@ class CliApplication extends Application{
         $this->setIp(gethostbyname(gethostname()));
     }
 
+    /**
+     * @inheritdoc
+     */
     protected function createOperator(): Operator{
         $operator = new Operator();
         $operator->id = getmyuid();

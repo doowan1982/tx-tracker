@@ -54,7 +54,7 @@ abstract class Application{
         if($this->traceId){
             $this->isHead = false;
         }
-        $this->timestamp = microtime(true);
+        $this->timestamp = Utils::getIntegerMicroTime();
     }
 
     public function getId(): string{
@@ -86,14 +86,14 @@ abstract class Application{
     public function getTraceId(): string{
         //调用链首部，如果为设置traceId，则自动生成
         if($this->traceId === null){
-            $this->traceId = $this->generateId(); //默认使用首部traceId来作为整个调用链的id标识
+            $this->traceId = Utils::generateId();
         }
         return $this->traceId;
     }
 
     /**
      * @param string $traceId
-     * @return Invocation
+     * @return Span
      */
     public function setTraceId($traceId){
         $this->traceId = $traceId;
@@ -107,7 +107,7 @@ abstract class Application{
         return $this->isHead;
     }
 
-    public function getTimestamp(): float{
+    public function getTimestamp(): int{
         return $this->timestamp;
     }
 
@@ -116,13 +116,6 @@ abstract class Application{
      */
     public function getDataPackage(): DataPackage{
         return new DataPackage($this);
-    }
-
-    /**
-     * @return string
-     */
-    protected function generateId(): string{
-        return md5(uniqid().$this->timestamp.$this->getIp().$this->getId());
     }
 
     /**

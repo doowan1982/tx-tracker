@@ -1,5 +1,8 @@
 <?php
 namespace Tesoon\Tracker;
+
+use Tesoon\Tracker\Exception\TraceException;
+
 final class Tracker{
 
     private static $traker;
@@ -12,29 +15,18 @@ final class Tracker{
     }
 
     /**
-     * @var callable
-     */
-    private $exceptionHandler = null;
-
-    /**
-     * @var callable
-     */
-    private $shutdownHandler = null;
-
-    public function setExceptionHandler($exceptionHandler){
-        $this->exceptionHandler = $exceptionHandler;
-        set_exception_handler($this->exceptionHandler);
-    }
-
-    public function setShutdownHandler($shutdownHandler){
-        $this->shutdownHandler = $shutdownHandler;
-        register_shutdown_function($this->shutdownHandler);
-    }
-
-    /**
      * @var Application
      */
     private $application;
+
+    /**
+     * @var SpanCollection
+     */
+    private $collection;
+
+    public function __construct(){
+        $this->collection = new SpanCollection();
+    }
 
     /**
      * @param Application $application
@@ -57,60 +49,36 @@ final class Tracker{
     }
 
     /**
-     * 该值在invocationCount启用时用于记录headInvocation中最后一个Invocation
-     * @var Invocation
-     */
-    private $segementInvocationId;
-
-    /**
      * 调用链超过该值将触发自动发送数据，0为始终在调用结束发送数据
      * @var int
      */
-    private $invocationCount = 0;
+    private $spanCount = 0;
 
     /**
-     * 设置从$this->headInvocation到子代保留与内存中的数量，如果超过该值，将自动保存数据
+     * 设置collection的长度，如果超过该值，将自动保存数据
      * 该方法可在处理过程中进行多次调用
-     * @param int $invocationCount
+     * @param int $spanCount
      */
-    public function setInvocationCount(int $invocationCount = 0): Tracker{
-        $this->invocationCount = $invocationCount;
+    public function setSpanCount(int $spanCount = 0): Tracker{
+        $this->spanCount = $spanCount;
         return $this;
     }
 
     /**
-     * @var Invocation
-     */
-    private $headInvocation;
-
-    /**
-     * 追加invocation到headInvocation的调用链队尾
-     * @param Invocation $invocation
+     * @param Span $span
      * @return Tracker
      */
-    public function add(Invocation $invocation): Tracker{
-        if(!$this->exceptionHandler){
-            $this->setExceptionHandler([$this, 'registerExceptionHandler']);
-        }
-        if(!$this->shutdownHandler){
-            $this->setShutdownHandler([$this, 'registerShutdown']);
-        }
-        
-        if($this->headInvocation === null){
-            if($this->segementInvocationId != null){
-                $invocation->setParentInvocationId($this->segementInvocationId);
+    public function add(Span $span): Tracker{
+        $current = $this->collection->current();
+        if($this->spanCount > 0 && 
+                $this->collection->size() >= $this->spanCount){
+            $this->flush();
+            if($current != null){
+                $span->setParentSpanId($current->getSpanId());
+                $span->setDuration($current->getTimestamp());            
             }
-            $this->headInvocation = $invocation;
-        }else{
-            $this->headInvocation->setNext($invocation);
         }
-        
-        if($this->invocationCount > 0 && 
-                $this->headInvocation->getGenerationCount() >= $this->invocationCount && 
-                    $this->save()){
-            $this->segementInvocationId = $this->headInvocation->getLast()->getInvocationId();
-            $this->headInvocation = null; //重置头信息
-        }
+        $this->collection->add($span);
         return $this;
     }
 
@@ -129,30 +97,26 @@ final class Tracker{
     }
 
     /**
-     * 保存数据
-     * @return bool
+     * @return SpanCollection
      */
-    public function save(): bool{
-        if(!$this->headInvocation){
-            return true;
-        }
+    public function getSpanCollection(): SpanCollection{
+        return $this->collection;
+    }
+
+    /**
+     * 将数据通过sender推送到外部
+     * 为保证数据被有效刷新到远端仓库，考虑使用register_shutdown_function
+     * @return bool
+     * @throws TraceException
+     */
+    public function flush(): bool{
         if($this->sender === null){
             throw new TraceException("Please indicate DataSender!");
         }
-        return $this->sender->send($this->headInvocation);
-    }
-
-    public function registerExceptionHandler($exception){
-        $message = $exception->getMessage();
-        $file = $exception->getFile();
-        $line = $exception->getLine();
-        $message = "发生异常：{$message}[{$file}:{$line}]";
-        $this->add(Invocation::create($message));
-        restore_exception_handler();
-    }
-
-    public function registerShutdown(){
-        $this->save();
+        if($this->collection->size() === 0){
+            return true;
+        }
+        return $this->sender->send($this->application->getDataPackage());
     }
 
 }

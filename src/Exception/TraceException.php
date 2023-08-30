@@ -1,5 +1,5 @@
 <?php
-namespace Tesoon\Tracker;
+namespace Tesoon\Tracker\Exception;
 class TraceException extends \Exception{
 
 }

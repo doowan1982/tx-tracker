@@ -7,6 +7,9 @@ class WebApplication extends Application{
         $this->setIp(gethostbyname(gethostname()));
     }
 
+    /**
+     * @inheritdoc
+     */
     protected function createOperator(): Operator{
         //此处用于创建框架内部的用户
         $operator = new Operator();
