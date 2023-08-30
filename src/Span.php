@@ -2,6 +2,11 @@
 namespace Tesoon\Tracker;
 class Span{
 
+    const DB_QUERY_SPAN_TAG = 'query';
+    const DB_UPDATE_SPAN_TAG = 'update';
+    const DB_INSERT_SPAN_TAG = 'insert';
+    const DB_DELETE_SPAN_TAG = 'delete';
+
     /**
      * @var Span
      */
@@ -46,6 +51,11 @@ class Span{
      */
     private $arguments = [];
 
+    /**
+     * 最终的代码标签，用于后期的统计
+     */
+    private $tags = [];
+
 
     public static function create(string $desc): Span{
         return new static($desc);
@@ -68,8 +78,47 @@ class Span{
         $this->timestamp = Utils::getIntegerMicroTime();
     }
 
+    /**
+     * @return string
+     */
     public function getDesc(): string{
         return $this->desc;
+    }
+
+    /**
+     * @return Span
+     */
+    public function tag(string $name): Span{
+        $this->tags[] = $name;
+        return $this;
+    }
+
+    /**
+     * @return Span
+     */
+    public function query(){
+        return $this->tag(self::DB_QUERY_SPAN_TAG);
+    }
+
+    /**
+     * @return Span
+     */
+    public function insert(){
+        return $this->tag(self::DB_INSERT_SPAN_TAG);
+    }
+
+    /**
+     * @return Span
+     */
+    public function update(){
+        return $this->tag(self::DB_UPDATE_SPAN_TAG);
+    }
+    
+    /**
+     * @return Span
+     */
+    public function delete(){
+        return $this->tag(self::DB_DELETE_SPAN_TAG);
     }
 
     /**
@@ -120,6 +169,16 @@ class Span{
      */
     public function getParentSpanId(): string{
         return $this->parent;
+    }
+
+    /**
+     * @param string $key
+     * @param string $name
+     * @return Span
+     */
+    public function setArgument(string $key, string $name){
+        $this->arguments[$key] = $name;
+        return $this;
     }
 
     /**
@@ -178,7 +237,8 @@ class Span{
             'desc' => $this->desc,
             'targetName' => $this->targetName,
             'args' => $this->arguments,
-            'duration' => $this->duration, 
+            'duration' => $this->duration,
+            'tags' => $this->tags,
         ];
     }
 

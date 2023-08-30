@@ -34,6 +34,7 @@ final class Tracker{
      */
     public function setApplication(Application $application): Tracker{
         $this->application = $application;
+        $this->getTraceHeader()->setTraceId($this->application->getTraceId());
         return $this;
     }
 
@@ -78,8 +79,17 @@ final class Tracker{
                 $span->setDuration($current->getTimestamp());            
             }
         }
+        $this->getTraceHeader()->setSpan($span);
         $this->collection->add($span);
         return $this;
+    }
+
+    /**
+     * 返回当前的Span
+     * @return Span
+     */
+    public function getCurrentSpan(): ?Span{
+        return $this->getSpanCollection()->current();
     }
 
     /**
@@ -101,6 +111,21 @@ final class Tracker{
      */
     public function getSpanCollection(): SpanCollection{
         return $this->collection;
+    }
+
+    /**
+     * @var Header
+     */
+    private $header;
+
+    /**
+     * @return Header
+     */
+    public function getTraceHeader(): Header{
+        if($this->header === null){
+            $this->header = new Header();
+        }
+        return $this->header;
     }
 
     /**
