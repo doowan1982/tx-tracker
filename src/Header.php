@@ -3,9 +3,9 @@ namespace Tesoon\Tracker;
 
 class Header{
 
-    const TRACE_ID = 'TRACE-ID';
-    const TRACE_SPAN_ID = 'TRACE-SPAN-ID';
-    const TRACE_TIMESTAMP = 'TRACE-TIMESTAMP';
+    const TRACE_ID = 'X-TRACE-ID';
+    const TRACE_SPAN_ID = 'X-TRACE-SPAN-ID';
+    const TRACE_TIMESTAMP = 'X-TRACE-TIMESTAMP';
     /**
      * @string
      */
@@ -39,6 +39,16 @@ class Header{
 
     public function getTraceId(): string{
         return $this->traceId;
+    }
+
+    public function setSpanId(string $spanId): Header{
+        $this->spanId = $spanId;
+        return $this;
+    }
+
+    public function setTimestamp(int $timestamp){
+        $this->timestamp = $timestamp;
+        return $this;
     }
 
     public function setSpan(Span $span): Header{

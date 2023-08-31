@@ -27,4 +27,12 @@ class Utils{
         return self::getMicroTime() * 1000 * 1000;
     }
 
+    /**
+     * @param mixed $value
+     * @return bool
+     */
+    public static function isPrimitiveType($value): bool{
+        return is_int($value) || is_float($value) || is_bool($value) || is_string($value);
+    }
+
 }

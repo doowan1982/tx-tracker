@@ -2,11 +2,6 @@
 namespace Tesoon\Tracker;
 class Span{
 
-    const DB_QUERY_SPAN_TAG = 'query';
-    const DB_UPDATE_SPAN_TAG = 'update';
-    const DB_INSERT_SPAN_TAG = 'insert';
-    const DB_DELETE_SPAN_TAG = 'delete';
-
     /**
      * @var Span
      */
@@ -86,39 +81,32 @@ class Span{
     }
 
     /**
+     * @param string $name Only valid
+     * @param mixed $value Only valid for primitive types
      * @return Span
+     * @see Tesoon\Tracker\SpanTags
      */
-    public function tag(string $name): Span{
-        $this->tags[] = $name;
+    public function tag(string $name, $value): Span{
+        if(!Utils::isPrimitiveType($value)){
+            return $this;
+        }
+        if(!isset($this->tags[$name])){
+            $this->tags[$name] = [];
+        }
+        $this->tags[$name][] = $value;
         return $this;
     }
 
-    /**
-     * @return Span
-     */
-    public function query(){
-        return $this->tag(self::DB_QUERY_SPAN_TAG);
+    public function tagForDb($value): Span{
+        return $this->tag(SpanTags::SQL, $value);
     }
 
-    /**
-     * @return Span
-     */
-    public function insert(){
-        return $this->tag(self::DB_INSERT_SPAN_TAG);
+    public function tagForStatus($value): Span{
+        return $this->tag(SpanTags::STATUS_CODE, $value);
     }
 
-    /**
-     * @return Span
-     */
-    public function update(){
-        return $this->tag(self::DB_UPDATE_SPAN_TAG);
-    }
-    
-    /**
-     * @return Span
-     */
-    public function delete(){
-        return $this->tag(self::DB_DELETE_SPAN_TAG);
+    public function tagForUrl($value): Span{
+        return $this->tag(SpanTags::URL, $value);
     }
 
     /**
@@ -140,8 +128,13 @@ class Span{
         return $this->timestamp;
     }
 
-    public function setSpanId(string $spanId){
+    /**
+     * @param string $spanId 
+     * @return Span
+     */
+    public function setSpanId(string $spanId): Span{
         $this->spanId = $spanId;
+        return $this;
     }
 
     /**
@@ -153,7 +146,6 @@ class Span{
         }
         return $this->spanId;
     }
-
 
     /**
      * @param string
@@ -173,11 +165,14 @@ class Span{
 
     /**
      * @param string $key
-     * @param string $name
+     * @param mixed $value Only valid for primitive types
      * @return Span
      */
-    public function setArgument(string $key, string $name){
-        $this->arguments[$key] = $name;
+    public function setArgument(string $key, $value){
+        if(!Utils::isPrimitiveType($value)){
+            return $this;
+        }
+        $this->arguments[$key] = $value;
         return $this;
     }
 
@@ -195,18 +190,6 @@ class Span{
      */
     public function getNext(): Span{
         return $this->next;
-    }
-
-    /**
-     * 返回最后一个Span
-     * @return Span
-     */
-    public function getLast(): Span{
-        $last = $this;
-        if($this->next != null){
-            $last = $this->next->getLast();
-        }
-        return $last;
     }
 
     /**
