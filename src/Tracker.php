@@ -7,7 +7,7 @@ final class Tracker{
 
     private static $traker;
 
-    public static function getInstance(){
+    public static function getInstance(): Tracker{
         if(self::$traker === null){
             self::$traker = new static();
         }
@@ -26,6 +26,21 @@ final class Tracker{
 
     public function __construct(){
         $this->collection = new SpanCollection();
+    }
+
+    /**
+     * 是否启用Tracker
+     * @var bool
+     */
+    private $enabled = true;
+
+    /**
+     * 禁用Tracker
+     * @return Tracker
+     */
+    public function disable(): Tracker{
+        $this->enabled = false;
+        return $this;
     }
 
     /**
@@ -70,6 +85,9 @@ final class Tracker{
      * @return Tracker
      */
     public function add(Span $span): Tracker{
+        if(!$this->enabled){
+            return $this;
+        }
         $current = $this->collection->current();
         if($this->spanCount > 0 && 
                 $this->collection->size() >= $this->spanCount){
@@ -101,7 +119,7 @@ final class Tracker{
      * @var DataSender
      * @return Tracker
      */
-    public function setDataSender(DataSender $dataSender){
+    public function setDataSender(DataSender $dataSender): Tracker{
         $this->sender = $dataSender;
         return $this;
     }
@@ -135,6 +153,9 @@ final class Tracker{
      * @throws TraceException
      */
     public function flush(): bool{
+        if(!$this->enabled){
+            return $this;
+        }
         if($this->sender === null){
             throw new TraceException("Please indicate DataSender!");
         }
