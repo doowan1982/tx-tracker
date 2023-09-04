@@ -153,13 +153,10 @@ final class Tracker{
      * @throws TraceException
      */
     public function flush(): bool{
-        if(!$this->enabled){
-            return true;
-        }
         if($this->sender === null){
             throw new TraceException("Please indicate DataSender!");
         }
-        if($this->collection->size() === 0){
+        if(!$this->enabled || $this->collection->size() === 0){
             return true;
         }
         return $this->sender->send($this->application->getDataPackage());
