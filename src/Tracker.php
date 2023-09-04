@@ -154,7 +154,7 @@ final class Tracker{
      */
     public function flush(): bool{
         if(!$this->enabled){
-            return $this;
+            return true;
         }
         if($this->sender === null){
             throw new TraceException("Please indicate DataSender!");
