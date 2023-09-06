@@ -3,7 +3,7 @@ namespace Tesoon\Tracker;
 
 use Tesoon\Tracker\Exception\HttpException;
 
-class HttpDataSender implements DataSender{
+class HttpDataSender extends DataSender{
 
     /**
      * @var string
@@ -27,10 +27,17 @@ class HttpDataSender implements DataSender{
     }
 
     /**
+     * @param string|array $headers
+     */
+    public function setHeaders($headers){
+        $this->headers = array_merge($this->headers, (array)$headers);
+    }
+
+    /**
      * @inheritdoc
      */
-    public function send(DataPackage $package): bool {
-        $data = json_encode($package->toArray(), JSON_UNESCAPED_UNICODE);
+    protected function send(array $data): bool {
+        $data = json_encode($data, JSON_UNESCAPED_UNICODE);
         $ch = curl_init($this->url);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);

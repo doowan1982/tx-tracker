@@ -159,7 +159,7 @@ final class Tracker{
         if(!$this->enabled || $this->collection->size() === 0){
             return true;
         }
-        return $this->sender->send($this->application->getDataPackage());
+        return $this->sender->collectAndSend($this->application->getDataPackage());
     }
 
 }

@@ -8,26 +8,29 @@ class DataPackage{
     private $application;
 
     /**
-     * @var array
+     * @var array|null
      */
-    public $spans = [];
+    private $data;
 
     public function __construct(Application $application){
         $this->application = $application;
     }
 
     /**
-     * 设置打包发送的span
-     * @param array $spans
+     * 数据发送后进行重置
+     * @see DataSender
      */
-    public function setSpans(array $spans){
-        $this->spans = $spans;
+    public function reset(){
+        $this->data = null;
     }
 
     /**
      * @return array
      */
     public function toArray(): array{
+        if($this->data != null){
+            return $this->data;
+        }
         $operator = $this->application->getOperator();
         $spans = Tracker::getInstance()->getSpanCollection()->all();
         $current = null;
@@ -42,7 +45,7 @@ class DataPackage{
             $spans[$key] = $span->toArray();
         }
         
-        return [
+        return $this->data = [
             'aid' => $this->application->getId(),
             'aip' => $this->application->getIp(),
             'uid' => $operator->id,

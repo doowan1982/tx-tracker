@@ -1,6 +1,22 @@
 <?php
 namespace Tesoon\Tracker;
-interface DataSender{
+/**
+ * 将DataPackage中的数据
+ */
+abstract class DataSender{
+
+    /**
+     * 
+     * @param DataPackage $package
+     * @return bool
+     */
+    public function collectAndSend(DataPackage $package): bool{
+        if(!$this->send($package->toArray())){
+            return false;
+        }
+        $package->reset();
+        return true;
+    }
 
     /**
      * 发送消息 
@@ -8,6 +24,5 @@ interface DataSender{
      * @return boolean
      * @throws HttpException
      */
-    public function send(DataPackage $package): bool;
-
+    protected abstract function send(array $data): bool;
 }
