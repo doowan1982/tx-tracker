@@ -116,12 +116,19 @@ final class Tracker{
     private $sender;
 
     /**
-     * @var DataSender
+     * @param DataSender dataSender
      * @return Tracker
      */
     public function setDataSender(DataSender $dataSender): Tracker{
         $this->sender = $dataSender;
         return $this;
+    }
+
+    /**
+     * @return DataSender
+     */
+    public function getDataSender(): DataSender{
+        return $this->sender;
     }
 
     /**
