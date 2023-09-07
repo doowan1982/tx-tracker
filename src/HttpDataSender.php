@@ -11,26 +11,26 @@ class HttpDataSender extends DataSender{
     private $url;
 
     /**
-     * @var array
+     * @var Header
      */
-    private $headers = [];
+    private $header = [];
 
     /**
      * @var array
      */
     private $timeout = 0;
 
-    public function __construct($url, array $headers=[], int $timeout = 1){
+    public function __construct(string $url, Header $header = null, int $timeout = 1){
         $this->url = $url;
-        $this->headers = $headers;
+        $this->header = $header ?? new Header();
         $this->timeout = $timeout;
     }
 
     /**
-     * @param string|array $headers
+     * @return Header
      */
-    public function setHeaders($headers){
-        $this->headers = array_merge($this->headers, (array)$headers);
+    public function getHeader(): Header{
+        return $this->header;
     }
 
     /**
@@ -44,11 +44,13 @@ class HttpDataSender extends DataSender{
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
 
-        $header = [
-            'Content-Type' => 'application/json',
-            'Content-Length' => strlen($data),
-        ];
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $header + $this->headers);
+        $this->header->setHeader('Content-Type', 'application/json');
+        $this->header->setHeader('Content-Length', strlen($data));
+        $headers = [];
+        foreach($this->header->get() as $name => $value){
+            $headers[] = "{$name}:{$value}";
+        }
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         
         if(curl_exec($ch) === false){
             $code = (int)curl_errno($ch);

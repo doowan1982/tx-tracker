@@ -125,13 +125,6 @@ final class Tracker{
     }
 
     /**
-     * @return DataSender
-     */
-    public function getDataSender(): DataSender{
-        return $this->sender;
-    }
-
-    /**
      * @return SpanCollection
      */
     public function getSpanCollection(): SpanCollection{

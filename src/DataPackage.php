@@ -17,14 +17,6 @@ class DataPackage{
     }
 
     /**
-     * 数据发送后进行重置
-     * @see DataSender
-     */
-    public function reset(){
-        $this->data = null;
-    }
-
-    /**
      * @return array
      */
     public function toArray(): array{

@@ -31,7 +31,7 @@ class Header{
      * @return Header
      */
     public function setTraceId(string $traceId): Header{
-        $this->headers[self::TRACE_ID] = $traceId;
+        $this->setHeader(self::TRACE_ID, $traceId);
         return $this;
     }
 
@@ -40,7 +40,7 @@ class Header{
      * @return Header
      */
     public function setSpanId(string $spanId): Header{
-        $this->headers[self::TRACE_SPAN_ID] = $spanId;
+        $this->setHeader(self::TRACE_SPAN_ID, $spanId);
         return $this;
     }
 
@@ -49,7 +49,7 @@ class Header{
      * @return Header
      */
     public function setTimestamp(int $timestamp){
-        $this->headers[self::TRACE_TIMESTAMP] = $timestamp;
+        $this->setHeader(self::TRACE_TIMESTAMP, $timestamp);
         return $this;
     }
 

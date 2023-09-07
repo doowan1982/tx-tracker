@@ -6,7 +6,6 @@ namespace Tesoon\Tracker;
 abstract class DataSender{
 
     /**
-     * 
      * @param DataPackage $package
      * @return bool
      */
@@ -14,7 +13,6 @@ abstract class DataSender{
         if(!$this->send($package->toArray())){
             return false;
         }
-        $package->reset();
         return true;
     }
 
