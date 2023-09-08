@@ -20,9 +20,19 @@ class HttpDataSender extends DataSender{
      */
     private $timeout = 0;
 
-    public function __construct(string $url, Header $header = null, int $timeout = 1){
+    /**
+     * @var array
+     */
+    private $options = [];
+
+    public function __construct(string $url, Header $header = null, array $options=[], int $timeout = 1){
         $this->url = $url;
         $this->header = $header ?? new Header();
+        $this->options = [
+            CURLOPT_POST => 1,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_TIMEOUT => $timeout,
+        ] + $options;
         $this->timeout = $timeout;
     }
 
@@ -39,10 +49,8 @@ class HttpDataSender extends DataSender{
     protected function send(array $data): bool {
         $data = json_encode($data, JSON_UNESCAPED_UNICODE);
         $ch = curl_init($this->url);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
+        $this->options[CURLOPT_POSTFIELDS] = $data;
+        curl_setopt_array($ch, $this->options);
 
         $this->header->setHeader('Content-Type', 'application/json');
         $this->header->setHeader('Content-Length', strlen($data));
